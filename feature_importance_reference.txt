@@ -1,0 +1,21 @@
+Rank | Feature | Expected Importance & Rationale
+1 | avail_tugs_zone | High - Direct asset availability dictates immediate failure (Rule 1).
+2 | avail_loaders_zone | High - Direct asset availability dictates immediate failure (Rule 1).
+3 | avail_gpus_zone | High - Direct asset availability dictates immediate failure (Rule 1).
+4 | concurrent_arrivals_30min | High - Drives both equipment congestion and driver demand waves (Rule 2, 3, 6).
+5 | gse_operator_on_duty_count | High - Serves as a major operational bottleneck under peak waves and severe weather (Rule 2, 5).
+6 | aircraft_type | Medium-High - Widebodies require double the resources (Rule 3).
+7 | terminal_zone | Medium - High localized strain in Terminal_B causes targeted shortages (Rule 3).
+8 | arrival_delay_mins | Medium - Creates cascading flight congestion waves at gates (Rule 3).
+9 | total_zone_baggage_volume | Medium - Highly correlated with peak hub banking hours and workload (Rule 6).
+10 | fleet_utilization_ratio | Medium - Linked with high thermal drain and battery degradation (Rule 4).
+11 | ambient_temperature_c | Medium - Overheating thresholds directly trigger operational outages (Rule 4).
+12 | avg_battery_soc_zone | Medium - Low battery charge flags operational tool downtime (Rule 4).
+13 | wind_speed_knots | Medium-Low - High wind speeds delay transits across the apron (Rule 5).
+14 | precipitation_intensity | Medium-Low - Intense rainfall slows down asset mobilization (Rule 5).
+15 | required_belt_loaders | Low - Partially redundant with aircraft type but adds specific noise/variance.
+16 | required_pushback_tugs | Low - Standardized resource requirement dependent on aircraft type.
+17 | required_gpus | Low - Standardized resource requirement dependent on aircraft type.
+18 | active_fault_code_count_zone | Low - Background operational health variance.
+19 | actual_arrival_timestamp | Low - Time metadata useful for feature engineering (diurnal extraction).
+20 | flight_id | None - Unique key tracker (should be excluded from tree splits).
