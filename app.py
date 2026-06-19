@@ -1,13 +1,12 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import pickle
 import warnings
 
 warnings.filterwarnings("ignore")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# PAGE CONFIGURATION
+# PAGE CONFIG
 # ─────────────────────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="GSE Availability Prediction System",
@@ -16,33 +15,30 @@ st.set_page_config(
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CUSTOM CSS  —  Airport Ground Operations Control System theme
-# Dark Navy Blue / White / Sky Blue / Grey palette
+# CSS
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown(
     """
     <style>
-    /* ── Global reset ──────────────────────────────────────────────── */
     html, body, [data-testid="stApp"] {
         background-color: #0b1a2e;
         color: #e8edf5;
         font-family: 'Segoe UI', 'Inter', sans-serif;
     }
 
-    /* ── Hide sidebar toggle ──────────────────────────────────────── */
-    [data-testid="stSidebar"]         { display: none; }
-    [data-testid="collapsedControl"]  { display: none; }
+    [data-testid="stSidebar"]        { display: none; }
+    [data-testid="collapsedControl"] { display: none; }
 
-    /* ── Header banner ────────────────────────────────────────────── */
+    /* ── Header ─────────────────────────────────────────────────── */
     .gse-header {
         background: linear-gradient(135deg, #0d2044 0%, #112d5c 60%, #1a3a6b 100%);
         border-bottom: 2px solid #2c78d4;
-        padding: 28px 40px 22px 40px;
+        padding: 26px 40px 20px 40px;
         border-radius: 0 0 12px 12px;
-        margin-bottom: 28px;
+        margin-bottom: 26px;
     }
     .gse-header h1 {
-        font-size: 1.75rem;
+        font-size: 1.65rem;
         font-weight: 700;
         color: #ffffff;
         letter-spacing: 0.04em;
@@ -50,52 +46,32 @@ st.markdown(
         margin: 0 0 4px 0;
     }
     .gse-header .subtitle {
-        font-size: 0.85rem;
+        font-size: 0.82rem;
         color: #7fb3e8;
         letter-spacing: 0.08em;
         text-transform: uppercase;
     }
-    .status-badge {
-        display: inline-block;
-        background: #133a6a;
-        border: 1px solid #2c78d4;
-        border-radius: 20px;
-        padding: 3px 14px;
-        font-size: 0.75rem;
-        color: #7fb3e8;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        margin-top: 8px;
-    }
 
-    /* ── Section cards ────────────────────────────────────────────── */
-    .section-card {
-        background: #0f2340;
-        border: 1px solid #1e3a5f;
-        border-radius: 10px;
-        padding: 22px 26px;
-        margin-bottom: 20px;
-    }
+    /* ── Section label ───────────────────────────────────────────── */
     .section-title {
-        font-size: 0.72rem;
+        font-size: 0.70rem;
         font-weight: 700;
         letter-spacing: 0.14em;
         text-transform: uppercase;
         color: #4ea0e0;
         border-left: 3px solid #2c78d4;
         padding-left: 10px;
-        margin-bottom: 18px;
+        margin-bottom: 16px;
+        margin-top: 4px;
     }
 
-    /* ── Streamlit widget overrides ───────────────────────────────── */
-    [data-testid="stSelectbox"] label,
+    /* ── Widget label overrides ──────────────────────────────────── */
+    label, [data-testid="stSelectbox"] label,
     [data-testid="stSlider"] label,
     [data-testid="stNumberInput"] label,
-    [data-testid="stRadio"] label,
-    .stSlider label,
-    label {
+    [data-testid="stRadio"] label {
         color: #a8c4e0 !important;
-        font-size: 0.82rem !important;
+        font-size: 0.81rem !important;
         font-weight: 500 !important;
         letter-spacing: 0.03em;
     }
@@ -105,29 +81,27 @@ st.markdown(
         border-color: #1e3a5f !important;
         color: #e8edf5 !important;
     }
-    div[data-baseweb="input"] input {
+    div[data-baseweb="input"] input,
+    [data-testid="stNumberInput"] input {
         background-color: #0d2044 !important;
         border-color: #1e3a5f !important;
         color: #e8edf5 !important;
     }
-    [data-testid="stNumberInput"] input {
-        background-color: #0d2044 !important;
-        color: #e8edf5 !important;
+
+    /* ── Divider ─────────────────────────────────────────────────── */
+    hr {
+        border: none;
+        border-top: 1px solid #1e3a5f;
+        margin: 20px 0;
     }
 
-    /* Slider track */
-    [data-testid="stSlider"] [data-testid="stThumbValue"] {
-        color: #4ea0e0;
-    }
-
-    /* ── Predict button ───────────────────────────────────────────── */
-    [data-testid="stFormSubmitButton"] > button,
-    .stButton > button {
+    /* ── Submit button ───────────────────────────────────────────── */
+    [data-testid="stFormSubmitButton"] > button {
         background: linear-gradient(90deg, #1a5bbf, #2c78d4) !important;
         color: #ffffff !important;
         font-weight: 700 !important;
-        font-size: 0.92rem !important;
-        letter-spacing: 0.08em !important;
+        font-size: 0.90rem !important;
+        letter-spacing: 0.10em !important;
         text-transform: uppercase !important;
         border: none !important;
         border-radius: 8px !important;
@@ -135,94 +109,47 @@ st.markdown(
         width: 100% !important;
         transition: all 0.2s ease !important;
     }
-    [data-testid="stFormSubmitButton"] > button:hover,
-    .stButton > button:hover {
+    [data-testid="stFormSubmitButton"] > button:hover {
         background: linear-gradient(90deg, #2166cc, #3d8be0) !important;
         box-shadow: 0 0 18px rgba(44,120,212,0.45) !important;
     }
 
-    /* ── Result cards ─────────────────────────────────────────────── */
+    /* ── Result cards ────────────────────────────────────────────── */
     .result-available {
         background: linear-gradient(135deg, #0a2e1a 0%, #0d3d22 100%);
         border: 2px solid #1e8c4a;
         border-radius: 14px;
-        padding: 36px 40px;
+        padding: 40px 40px;
         text-align: center;
         box-shadow: 0 0 40px rgba(30,140,74,0.30);
         margin: 28px 0;
     }
-    .result-available .result-label {
-        font-size: 0.75rem;
-        font-weight: 700;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        color: #52c47a;
-        margin-bottom: 10px;
-    }
     .result-available .result-text {
-        font-size: 1.6rem;
+        font-size: 1.7rem;
         font-weight: 800;
         color: #ffffff;
         letter-spacing: 0.06em;
         text-transform: uppercase;
-    }
-    .result-available .result-icon {
-        font-size: 2.8rem;
-        margin-bottom: 12px;
-        color: #1e8c4a;
     }
 
     .result-shortage {
         background: linear-gradient(135deg, #2e0a0a 0%, #3d1010 100%);
         border: 2px solid #c0392b;
         border-radius: 14px;
-        padding: 36px 40px;
+        padding: 40px 40px;
         text-align: center;
         box-shadow: 0 0 40px rgba(192,57,43,0.35);
         margin: 28px 0;
     }
-    .result-shortage .result-label {
-        font-size: 0.75rem;
-        font-weight: 700;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        color: #e57373;
-        margin-bottom: 10px;
-    }
     .result-shortage .result-text {
-        font-size: 1.6rem;
+        font-size: 1.7rem;
         font-weight: 800;
         color: #ffffff;
         letter-spacing: 0.06em;
         text-transform: uppercase;
     }
-    .result-shortage .result-icon {
-        font-size: 2.8rem;
-        margin-bottom: 12px;
-        color: #c0392b;
-    }
 
-    /* ── Divider ──────────────────────────────────────────────────── */
-    hr {
-        border: none;
-        border-top: 1px solid #1e3a5f;
-        margin: 24px 0;
-    }
-
-    /* ── Footer ───────────────────────────────────────────────────── */
-    .gse-footer {
-        text-align: center;
-        font-size: 0.72rem;
-        color: #3d5a7a;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        padding: 18px 0 8px 0;
-    }
-
-    /* ── Error / info overrides ───────────────────────────────────── */
-    [data-testid="stAlert"] {
-        border-radius: 8px;
-    }
+    [data-testid="stAlert"] { border-radius: 8px; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -236,27 +163,15 @@ st.markdown(
     <div class="gse-header">
         <h1>Ground Support Equipment Availability Prediction System</h1>
         <div class="subtitle">Airport Ramp &amp; Ground Handling Operations — Decision Support Tool</div>
-        <div class="status-badge">System Active</div>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
-# MODEL LOADING
-# Expected feature order (OHE, no timestamp):
-#   arrival_delay_mins, required_pushback_tugs, required_belt_loaders,
-#   required_gpus, concurrent_arrivals_30min, total_zone_baggage_volume,
-#   avail_tugs_zone, avail_loaders_zone, avail_gpus_zone,
-#   avg_battery_soc_zone, fleet_utilization_ratio,
-#   gse_operator_on_duty_count, active_fault_code_count_zone,
-#   ambient_temperature_c, precipitation_intensity, wind_speed_knots,
-#   aircraft_type_Narrowbody, aircraft_type_Widebody,
-#   terminal_zone_Terminal_A, terminal_zone_Terminal_B,
-#   terminal_zone_Terminal_C
+# FEATURE COLUMN ORDER  (matches model training exactly)
+# OHE applied to aircraft_type and terminal_zone; no timestamp; no scaling
 # ─────────────────────────────────────────────────────────────────────────────
-MODEL_PATH = "gse_traditional_model.pkl"
-
 FEATURE_COLUMNS = [
     "arrival_delay_mins",
     "required_pushback_tugs",
@@ -281,6 +196,11 @@ FEATURE_COLUMNS = [
     "terminal_zone_Terminal_C",
 ]
 
+# ─────────────────────────────────────────────────────────────────────────────
+# MODEL LOADING
+# ─────────────────────────────────────────────────────────────────────────────
+MODEL_PATH = "gse_traditional_model.pkl"
+
 
 @st.cache_resource(show_spinner="Loading prediction model...")
 def load_model(path: str):
@@ -303,11 +223,16 @@ except Exception as exc:
     st.error(f"Failed to load model: {exc}")
     st.stop()
 
-# ─────────────────────────────────────────────────────────────────────────────
-# HELPER — build feature dataframe from raw inputs
-# ─────────────────────────────────────────────────────────────────────────────
 
-def build_feature_dataframe(
+# ─────────────────────────────────────────────────────────────────────────────
+# FEATURE BUILDER
+# Applies the same transformation used at training time:
+#   - aircraft_type  → one-hot (Narrowbody / Widebody)
+#   - terminal_zone  → one-hot (Terminal_A / Terminal_B / Terminal_C)
+#   - actual_arrival_timestamp is NOT passed (model does not use it)
+#   - No scaling, no manual label encoding
+# ─────────────────────────────────────────────────────────────────────────────
+def build_input_df(
     aircraft_type: str,
     terminal_zone: str,
     arrival_delay_mins: int,
@@ -327,13 +252,6 @@ def build_feature_dataframe(
     total_zone_baggage_volume: int,
     ambient_temperature_c: float,
 ) -> pd.DataFrame:
-    """
-    Apply the same feature transformation used during training.
-    Categorical columns are one-hot encoded.
-    No scaling is applied.
-    No label encoding is applied.
-    Returns a single-row DataFrame with columns in FEATURE_COLUMNS order.
-    """
     row = {
         "arrival_delay_mins":           int(arrival_delay_mins),
         "required_pushback_tugs":       int(required_pushback_tugs),
@@ -359,89 +277,87 @@ def build_feature_dataframe(
         "terminal_zone_Terminal_B":     int(terminal_zone == "Terminal_B"),
         "terminal_zone_Terminal_C":     int(terminal_zone == "Terminal_C"),
     }
-    df = pd.DataFrame([row], columns=FEATURE_COLUMNS)
-    return df
+    return pd.DataFrame([row], columns=FEATURE_COLUMNS)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# INPUT FORM
+# INPUT FORM  —  18 features in 6 rows x 3 columns
+#
+# Row 1  | Aircraft Type          | Terminal Zone          | Arrival Delay (mins)
+# Row 2  | Concurrent Arrivals    | Required Pushback Tugs | Required Belt Loaders
+# Row 3  | Required GPUs          | Avail Tugs Zone        | Avail Loaders Zone
+# Row 4  | Avail GPUs Zone        | GSE Operators On Duty  | Active Fault Code Count
+# Row 5  | Precipitation Intensity| Wind Speed (knots)     | Ambient Temperature
+# Row 6  | Fleet Utilization Ratio| Battery SOC (%)        | Total Baggage Volume
 # ─────────────────────────────────────────────────────────────────────────────
 with st.form("gse_prediction_form"):
 
     # ── Section 1: Flight Information ────────────────────────────────────────
-    st.markdown('<div class="section-title">01 — Flight Information</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Flight Information</div>', unsafe_allow_html=True)
 
-    col1, col2 = st.columns(2)
-    with col1:
+    # Row 1
+    r1c1, r1c2, r1c3 = st.columns(3)
+    with r1c1:
         aircraft_type = st.selectbox(
             "Aircraft Type",
             options=["Narrowbody", "Widebody"],
             index=0,
-            help="Widebody aircraft require significantly more GSE resources.",
         )
-    with col2:
+    with r1c2:
         terminal_zone = st.selectbox(
             "Terminal Zone",
             options=["Terminal_A", "Terminal_B", "Terminal_C"],
             index=0,
-            help="Terminal zone determines the local GSE asset sub-pool.",
         )
-
-    col3, col4 = st.columns(2)
-    with col3:
+    with r1c3:
         arrival_delay_mins = st.slider(
             "Arrival Delay (minutes)",
             min_value=-15,
             max_value=180,
             value=30,
             step=1,
-            help="Negative values indicate early arrival.",
         )
-    with col4:
+
+    # Row 2
+    r2c1, r2c2, r2c3 = st.columns(3)
+    with r2c1:
         concurrent_arrivals_30min = st.slider(
-            "Concurrent Arrivals — 30-Minute Window",
+            "Concurrent Arrivals — 30 Min Window",
             min_value=0,
             max_value=11,
             value=4,
             step=1,
-            help="Number of aircraft arriving within a 30-minute window in the same zone.",
         )
-
-    st.markdown("<hr>", unsafe_allow_html=True)
-
-    # ── Section 2: GSE Requirement Information ───────────────────────────────
-    st.markdown('<div class="section-title">02 — GSE Requirement Information</div>', unsafe_allow_html=True)
-
-    col5, col6, col7 = st.columns(3)
-    with col5:
+    with r2c2:
         required_pushback_tugs = st.radio(
             "Required Pushback Tugs",
             options=[1, 2],
             index=0,
             horizontal=True,
         )
-    with col6:
+    with r2c3:
         required_belt_loaders = st.radio(
             "Required Belt Loaders",
             options=[1, 2, 3, 4],
             index=1,
             horizontal=True,
         )
-    with col7:
+
+    st.markdown("<hr>", unsafe_allow_html=True)
+
+    # ── Section 2: GSE Requirements & Available Equipment ────────────────────
+    st.markdown('<div class="section-title">GSE Requirements &amp; Available Equipment</div>', unsafe_allow_html=True)
+
+    # Row 3
+    r3c1, r3c2, r3c3 = st.columns(3)
+    with r3c1:
         required_gpus = st.radio(
             "Required GPUs (Ground Power Units)",
             options=[1, 2],
             index=0,
             horizontal=True,
         )
-
-    st.markdown("<hr>", unsafe_allow_html=True)
-
-    # ── Section 3: Available Equipment Information ───────────────────────────
-    st.markdown('<div class="section-title">03 — Available Equipment Information</div>', unsafe_allow_html=True)
-
-    col8, col9, col10 = st.columns(3)
-    with col8:
+    with r3c2:
         avail_tugs_zone = st.number_input(
             "Available Tugs in Zone",
             min_value=2,
@@ -449,7 +365,7 @@ with st.form("gse_prediction_form"):
             value=12,
             step=1,
         )
-    with col9:
+    with r3c3:
         avail_loaders_zone = st.number_input(
             "Available Belt Loaders in Zone",
             min_value=3,
@@ -457,7 +373,10 @@ with st.form("gse_prediction_form"):
             value=16,
             step=1,
         )
-    with col10:
+
+    # Row 4
+    r4c1, r4c2, r4c3 = st.columns(3)
+    with r4c1:
         avail_gpus_zone = st.number_input(
             "Available GPUs in Zone",
             min_value=2,
@@ -465,34 +384,7 @@ with st.form("gse_prediction_form"):
             value=10,
             step=1,
         )
-
-    col11, col12 = st.columns(2)
-    with col11:
-        avg_battery_soc_zone = st.slider(
-            "Average Battery State-of-Charge — Zone (%)",
-            min_value=2.0,
-            max_value=100.0,
-            value=62.0,
-            step=0.5,
-            help="Average SOC across all electric GSE assets in the zone.",
-        )
-    with col12:
-        fleet_utilization_ratio = st.slider(
-            "Fleet Utilization Ratio",
-            min_value=0.05,
-            max_value=0.90,
-            value=0.43,
-            step=0.01,
-            help="Ratio of fleet actively engaged in operations. 1.0 = 100% utilization.",
-        )
-
-    st.markdown("<hr>", unsafe_allow_html=True)
-
-    # ── Section 4: Operational Condition Information ──────────────────────────
-    st.markdown('<div class="section-title">04 — Operational Condition Information</div>', unsafe_allow_html=True)
-
-    col13, col14 = st.columns(2)
-    with col13:
+    with r4c2:
         gse_operator_on_duty_count = st.number_input(
             "GSE Operators On Duty",
             min_value=6,
@@ -500,18 +392,23 @@ with st.form("gse_prediction_form"):
             value=18,
             step=1,
         )
-    with col14:
+    with r4c3:
         active_fault_code_count_zone = st.slider(
             "Active Fault Code Count — Zone",
             min_value=0,
             max_value=12,
             value=6,
             step=1,
-            help="Number of active telematics warning flags across zone equipment.",
         )
 
-    col15, col16, col17 = st.columns(3)
-    with col15:
+    st.markdown("<hr>", unsafe_allow_html=True)
+
+    # ── Section 3: Operational Conditions ────────────────────────────────────
+    st.markdown('<div class="section-title">Operational Conditions</div>', unsafe_allow_html=True)
+
+    # Row 5
+    r5c1, r5c2, r5c3 = st.columns(3)
+    with r5c1:
         precipitation_intensity = st.slider(
             "Precipitation Intensity (mm/hr)",
             min_value=0.0,
@@ -519,39 +416,52 @@ with st.form("gse_prediction_form"):
             value=3.0,
             step=0.5,
         )
-    with col16:
+    with r5c2:
         wind_speed_knots = st.slider(
             "Wind Speed (knots)",
             min_value=0.0,
             max_value=50.0,
             value=25.0,
             step=0.5,
-            help="Wind speeds above 30 knots restrict high-lift loader extension.",
         )
-    with col17:
+    with r5c3:
         ambient_temperature_c = st.slider(
             "Ambient Temperature (C)",
             min_value=-10.0,
             max_value=48.0,
             value=19.0,
             step=0.5,
-            help="Temperatures above 40 C degrade battery and hydraulic performance.",
         )
 
-    col18, _ = st.columns([1, 1])
-    with col18:
+    # Row 6
+    r6c1, r6c2, r6c3 = st.columns(3)
+    with r6c1:
+        fleet_utilization_ratio = st.slider(
+            "Fleet Utilization Ratio",
+            min_value=0.05,
+            max_value=0.90,
+            value=0.43,
+            step=0.01,
+        )
+    with r6c2:
+        avg_battery_soc_zone = st.slider(
+            "Average Battery State-of-Charge (%)",
+            min_value=2.0,
+            max_value=100.0,
+            value=62.0,
+            step=0.5,
+        )
+    with r6c3:
         total_zone_baggage_volume = st.number_input(
             "Total Zone Baggage Volume (bags)",
             min_value=50,
             max_value=2500,
             value=924,
             step=10,
-            help="Total number of bags scheduled for the zone in the current shift.",
         )
 
     st.markdown("<hr>", unsafe_allow_html=True)
 
-    # ── Submit button ─────────────────────────────────────────────────────────
     predict_btn = st.form_submit_button(
         "CHECK EQUIPMENT AVAILABILITY",
         use_container_width=True,
@@ -560,27 +470,12 @@ with st.form("gse_prediction_form"):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# PREDICTION  —  triggered only when the button is clicked
+# PREDICTION
 # ─────────────────────────────────────────────────────────────────────────────
 if predict_btn:
 
-    # Input validation
-    validation_errors = []
-    if avail_tugs_zone < 0:
-        validation_errors.append("Available Tugs in Zone must be zero or greater.")
-    if avail_loaders_zone < 0:
-        validation_errors.append("Available Belt Loaders must be zero or greater.")
-    if avail_gpus_zone < 0:
-        validation_errors.append("Available GPUs must be zero or greater.")
-
-    if validation_errors:
-        for err in validation_errors:
-            st.error(err)
-        st.stop()
-
-    # Build feature dataframe with the same transformations applied at training time
     try:
-        input_df = build_feature_dataframe(
+        input_df = build_input_df(
             aircraft_type=aircraft_type,
             terminal_zone=terminal_zone,
             arrival_delay_mins=arrival_delay_mins,
@@ -604,49 +499,25 @@ if predict_btn:
         st.error(f"Input preparation error: {exc}")
         st.stop()
 
-    # Run model inference
     try:
         prediction = int(voting_ensemble.predict(input_df)[0])
     except Exception as exc:
         st.error(f"Prediction failed: {exc}")
         st.stop()
 
-    # ── Display result card ───────────────────────────────────────────────────
     _, result_col, _ = st.columns([1, 3, 1])
     with result_col:
         if prediction == 0:
             st.markdown(
-                """
-                <div class="result-available">
-                    <div class="result-label">Equipment Status</div>
-                    <div class="result-text">GSE Equipment Available</div>
-                </div>
-                """,
+                '<div class="result-available">'
+                '<div class="result-text">GSE Equipment Available</div>'
+                "</div>",
                 unsafe_allow_html=True,
             )
         else:
             st.markdown(
-                """
-                <div class="result-shortage">
-                    <div class="result-label">Equipment Status</div>
-                    <div class="result-text">GSE Equipment Not Available</div>
-                </div>
-                """,
+                '<div class="result-shortage">'
+                '<div class="result-text">GSE Equipment Not Available</div>'
+                "</div>",
                 unsafe_allow_html=True,
             )
-
-# ─────────────────────────────────────────────────────────────────────────────
-# FOOTER
-# ─────────────────────────────────────────────────────────────────────────────
-st.markdown(
-    """
-    <div class="gse-footer">
-        Ground Support Equipment Availability Prediction System
-        &nbsp;|&nbsp;
-        Soft Voting Ensemble: CatBoost &middot; LightGBM &middot; XGBoost &middot; ExtraTrees
-        &nbsp;|&nbsp;
-        Airport Ramp Operations Decision Support
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
