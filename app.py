@@ -302,12 +302,14 @@ with st.form("gse_prediction_form"):
             "Aircraft Type",
             options=["Narrowbody", "Widebody"],
             index=0,
+            help="Type of aircraft being serviced. Widebody aircraft require more GSE resources than narrowbody.",
         )
     with r1c2:
         terminal_zone = st.selectbox(
             "Terminal Zone",
             options=["Terminal_A", "Terminal_B", "Terminal_C"],
             index=0,
+            help="Airport terminal zone where the flight will be serviced. Each zone has its own GSE asset pool.",
         )
     with r1c3:
         arrival_delay_mins = st.slider(
@@ -316,6 +318,7 @@ with st.form("gse_prediction_form"):
             max_value=180,
             value=30,
             step=1,
+            help="Minutes the flight is delayed relative to scheduled arrival. Negative values indicate early arrival.",
         )
 
     # Row 2
@@ -327,6 +330,7 @@ with st.form("gse_prediction_form"):
             max_value=11,
             value=4,
             step=1,
+            help="Number of other aircraft arriving in the same zone within a 30-minute window. Higher values increase GSE demand.",
         )
     with r2c2:
         required_pushback_tugs = st.radio(
@@ -334,6 +338,7 @@ with st.form("gse_prediction_form"):
             options=[1, 2],
             index=0,
             horizontal=True,
+            help="Number of pushback tugs needed to move the aircraft from the gate to the taxiway.",
         )
     with r2c3:
         required_belt_loaders = st.radio(
@@ -341,6 +346,7 @@ with st.form("gse_prediction_form"):
             options=[1, 2, 3, 4],
             index=1,
             horizontal=True,
+            help="Number of belt loaders needed for baggage and cargo loading and unloading for this flight.",
         )
 
     st.markdown("<hr>", unsafe_allow_html=True)
@@ -356,6 +362,7 @@ with st.form("gse_prediction_form"):
             options=[1, 2],
             index=0,
             horizontal=True,
+            help="Number of ground power units required to supply electrical power to the aircraft while engines are off.",
         )
     with r3c2:
         avail_tugs_zone = st.number_input(
@@ -364,6 +371,7 @@ with st.form("gse_prediction_form"):
             max_value=25,
             value=12,
             step=1,
+            help="Total number of pushback tugs currently serviceable and available in this terminal zone.",
         )
     with r3c3:
         avail_loaders_zone = st.number_input(
@@ -372,6 +380,7 @@ with st.form("gse_prediction_form"):
             max_value=30,
             value=16,
             step=1,
+            help="Total number of belt loaders currently serviceable and available in this terminal zone.",
         )
 
     # Row 4
@@ -383,6 +392,7 @@ with st.form("gse_prediction_form"):
             max_value=20,
             value=10,
             step=1,
+            help="Total number of ground power units currently serviceable and available in this terminal zone.",
         )
     with r4c2:
         gse_operator_on_duty_count = st.number_input(
@@ -391,6 +401,7 @@ with st.form("gse_prediction_form"):
             max_value=37,
             value=18,
             step=1,
+            help="Number of licensed GSE operators currently on shift and available to operate equipment.",
         )
     with r4c3:
         active_fault_code_count_zone = st.slider(
@@ -399,6 +410,7 @@ with st.form("gse_prediction_form"):
             max_value=12,
             value=6,
             step=1,
+            help="Number of active telematics fault or warning codes across all GSE units in the zone. Higher counts indicate more equipment under maintenance.",
         )
 
     st.markdown("<hr>", unsafe_allow_html=True)
@@ -415,6 +427,7 @@ with st.form("gse_prediction_form"):
             max_value=30.0,
             value=3.0,
             step=0.5,
+            help="Current rainfall or precipitation rate in millimetres per hour. Heavy rain slows ramp operations and affects equipment mobility.",
         )
     with r5c2:
         wind_speed_knots = st.slider(
@@ -423,6 +436,7 @@ with st.form("gse_prediction_form"):
             max_value=50.0,
             value=25.0,
             step=0.5,
+            help="Current surface wind speed at the ramp. Speeds above 30 knots restrict high-lift loader and GPU positioning.",
         )
     with r5c3:
         ambient_temperature_c = st.slider(
@@ -431,6 +445,7 @@ with st.form("gse_prediction_form"):
             max_value=48.0,
             value=19.0,
             step=0.5,
+            help="Current outside air temperature in Celsius. Extreme temperatures degrade battery charge capacity and hydraulic fluid performance.",
         )
 
     # Row 6
@@ -442,6 +457,7 @@ with st.form("gse_prediction_form"):
             max_value=0.90,
             value=0.43,
             step=0.01,
+            help="Proportion of the total GSE fleet actively engaged in operations at this moment. A ratio close to 1.0 means nearly all equipment is in use.",
         )
     with r6c2:
         avg_battery_soc_zone = st.slider(
@@ -450,6 +466,7 @@ with st.form("gse_prediction_form"):
             max_value=100.0,
             value=62.0,
             step=0.5,
+            help="Average battery charge level across all electric GSE units in the zone. Low values indicate units may need charging before next deployment.",
         )
     with r6c3:
         total_zone_baggage_volume = st.number_input(
@@ -458,6 +475,7 @@ with st.form("gse_prediction_form"):
             max_value=2500,
             value=924,
             step=10,
+            help="Total number of bags and cargo units scheduled for handling in this zone during the current shift.",
         )
 
     st.markdown("<hr>", unsafe_allow_html=True)
